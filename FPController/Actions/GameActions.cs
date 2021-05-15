@@ -1,4 +1,4 @@
-// GENERATED AUTOMATICALLY FROM 'Assets/Assets Packs/FPController/Actions/Main.inputactions'
+// GENERATED AUTOMATICALLY FROM 'Assets/src/FPController/Actions/Main.inputactions'
 
 using System;
 using System.Collections;
