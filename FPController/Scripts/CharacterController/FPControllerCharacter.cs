@@ -8,7 +8,10 @@ using static UnityEngine.InputSystem.InputAction;
 [RequireComponent(typeof(PlayerInput))]
 public class FPControllerCharacter : MonoBehaviour {
     [Header("Movement")]
+    [Tooltip("Max movement speed")]
     [SerializeField] float movementSpeed = 5f;
+
+    [Tooltip("Factor that will divide the max speed when walking")]
     [SerializeField] float walkDivider = 2f;
     private Vector3 m_playerVelocity;
     private Vector3 m_moveVector;
@@ -29,15 +32,15 @@ public class FPControllerCharacter : MonoBehaviour {
     private CharacterController m_characterController;
     private SprintController m_sprintController;
     private CrouchController m_crouchController;
+    private Vector3 m_gravity = Vector3.zero;
 
     // States
     private bool m_walking = false;
 
-    private Vector3 m_gravity = Vector3.zero;
-
     private void Awake() {
         gameActions = new GameActions();
 
+        // Just binds callbacks with game actions
         SetupCallbacks();
     }
 
@@ -50,10 +53,10 @@ public class FPControllerCharacter : MonoBehaviour {
     }
 
     private void OnDestroy() {
+        // Just unbinds callbacks from game actions
         TeardownCallbacks();
     }
 
-    // Start is called before the first frame update
     void Start() {
         m_characterController = GetComponent<CharacterController>();
         m_sprintController = GetComponent<SprintController>();
@@ -73,34 +76,53 @@ public class FPControllerCharacter : MonoBehaviour {
     private void ProcessInput() {
         Vector2 readAction = gameActions.Player.Move.ReadValue<Vector2>();
 
+        // Multiply each vector direction with the value read from the input
         Vector3 forwardVector = transform.forward * readAction.y;
         Vector3 rightVector = transform.right * readAction.x;
 
+        // Combines them two and normalizes it to avoid faster diagonal movement
         m_moveVector = (forwardVector + rightVector).normalized;
     }
 
+    /// <summary>
+    /// Processes player input to compute the player movement
+    /// </summary>
     private void ProcessMovement() {
+        // Ensure that the y velocity does not tend to infinite 
         if (groundCheck && m_playerVelocity.y < Mathf.Epsilon) {
             m_playerVelocity.y = -2f;
         }
 
+        /*
+        * Importance order:
+        *   - Crouching
+        *   - Walking
+        *   - Sprinting
+        */
+        // Reduce the speed if the player is crouching
         if (m_crouchController) {
             m_moveVector /= m_crouchController.GetCrouchDivider();
-        }
-
-        if (m_walking) {
+        } else if (m_walking) {
+            // Reduce the speed if the player is walking
             m_moveVector /= walkDivider;
         } else if (m_sprintController) {
+            // Increase the speed if the player is sprinting
             m_moveVector *= m_sprintController.GetSprintMultiplier();
         }
 
+        // Apply max speed to the move vector and scale based on delta time to adjust speed to framerate
         m_characterController.Move(movementSpeed * m_moveVector * Time.deltaTime);
 
+        // Apply gravity to player velocity
         m_playerVelocity += Physics.gravity * Time.deltaTime;
 
+        // Apply velocity to movement (should be only vertical)
         m_characterController.Move(m_playerVelocity * Time.deltaTime);
     }
 
+    /// <summary>Casts a sphere from player position (center), with same radius as the player colider, 
+    /// perpendicular to a horizontal plane, to the player feet + a tiny offset and looking for a 
+    /// specific ground mask. The result is stored in <c>hitInfo</c></summary>
     private void GroundCheck() {
         RaycastHit hitInfo;
 
@@ -114,6 +136,10 @@ public class FPControllerCharacter : MonoBehaviour {
         );
     }
 
+    /// <summary>
+    /// Applies the jump force vertically directly to the player
+    /// </summary>
+    /// <param name="ctx">Context with the info of the event that triggered the jump</param>
     private void Jump(CallbackContext ctx) {
         if (groundCheck) {
             m_playerVelocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
