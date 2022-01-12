@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class FPLook : MonoBehaviour
-{
+public class FPLook : MonoBehaviour {
     [SerializeField]
     private LookSensitivity lookSensitivity = new LookSensitivity(1f, 0.2f);
-    
-    [Serializable] 
+
+    [Serializable]
     public class LookSensitivity {
         [SerializeField]
         protected float vertical;
@@ -58,26 +57,23 @@ public class FPLook : MonoBehaviour
     private void OnEnable() {
         gameActions.Player.Enable();
     }
-    
+
     private void OnDisable() {
         gameActions.Player.ShowCursor.performed -= ShowCursor;
         gameActions.Player.Disable();
     }
 
-    void Start()
-    {
+    void Start() {
         if (!TryGetComponent<Rigidbody>(out m_rigidbody) && !TryGetComponent<CharacterController>(out m_characterController)) {
-            throw new Exception("No rigidbody nor characterController defined");   
+            throw new Exception("No rigidbody nor characterController defined");
         }
     }
 
-    void Update()
-    {
+    void Update() {
         ProcessLook();
     }
 
-    private void ProcessLook()
-    {
+    private void ProcessLook() {
         var lookDelta = gameActions.Player.Look.ReadValue<Vector2>();
 
         m_cameraPitch = Mathf.Clamp(m_cameraPitch + -lookDelta.y * lookSensitivity.Vertical, -90, 90);
@@ -85,7 +81,7 @@ public class FPLook : MonoBehaviour
 
         Quaternion rotation = Quaternion.Euler(0f, m_cameraYaw, 0f);
 
-        if(m_rigidbody != null) {
+        if (m_rigidbody != null) {
             // The rigidbody only rotates along the Y axis (horizontal) so it can not end facing down, but we can still apply
             // a relative force
             m_rigidbody.MoveRotation(rotation);
@@ -99,8 +95,7 @@ public class FPLook : MonoBehaviour
         Camera.main.transform.eulerAngles = new Vector3(m_cameraPitch, m_cameraYaw, currRotation.z);
     }
 
-    private void ShowCursor(InputAction.CallbackContext obj)
-    {
+    private void ShowCursor(InputAction.CallbackContext obj) {
         Cursor.visible = true;
     }
 }

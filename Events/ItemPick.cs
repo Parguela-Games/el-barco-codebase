@@ -1,5 +1,5 @@
 
-using UnityEngine;
+using Manicomio.ActionableObjects;
 
 public delegate void NotifyItemPick(ActionableObject pickedItem);
 

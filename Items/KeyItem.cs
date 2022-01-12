@@ -1,6 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using Manicomio.ActionableObjects;
 
 public class KeyItem : ActionableObject
 {

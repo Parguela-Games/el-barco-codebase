@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
 
-[RequireComponent(typeof (Camera))]
-public class HeadTilt : MonoBehaviour
-{
+[RequireComponent(typeof(Camera))]
+public class HeadTilt : MonoBehaviour {
     [SerializeField] float maxHorizontalRange = 0.5f;
-    [SerializeField] float maxAngle = 45f;
-    [SerializeField]float tiltSmoothFactor = 0.3f;
+    [SerializeField] float maxAngle = 15f;
+    [SerializeField] float tiltSmoothFactor = 2f;
 
     private GameActions gameActions;
 
@@ -57,15 +56,14 @@ public class HeadTilt : MonoBehaviour
         m_traveledDistance = Vector3.zero;
     }
 
-    private void Update()
-    {
+    private void Update() {
         ProcessMovement();
         ProcessRotation();
     }
 
     private void ProcessRotation() {
         if (m_traveledRotation.magnitude >= m_remainingRotation.magnitude) {
-            if(tiltStatic) transform.localEulerAngles = startingRotation;   
+            if (tiltStatic) transform.localEulerAngles = startingRotation;
         } else {
             Vector3 localRotation = transform.localEulerAngles + tiltSmoothFactor * Time.deltaTime * m_remainingRotation;
 
@@ -77,18 +75,17 @@ public class HeadTilt : MonoBehaviour
 
     private void ProcessMovement() {
         if (m_traveledDistance.magnitude >= m_remainingDistance.magnitude) {
-            if(tiltStatic) transform.localPosition = startingPosition;
+            if (tiltStatic) transform.localPosition = startingPosition;
         } else {
             Vector3 localPosition = transform.localPosition + tiltSmoothFactor * Time.deltaTime * m_remainingDistance;
-        
+
             transform.localPosition = localPosition;
 
             m_traveledDistance += tiltSmoothFactor * Time.deltaTime * m_remainingDistance;
         }
     }
 
-    private void OnHeadTilt(CallbackContext ctx)
-    {
+    private void OnHeadTilt(CallbackContext ctx) {
         float tiltValue = ctx.ReadValue<float>();
 
         SetTargetPosition(tiltValue);
@@ -98,8 +95,7 @@ public class HeadTilt : MonoBehaviour
         tiltStatic = false;
     }
 
-    private void SetTargetRotation(float tiltValue)
-    {
+    private void SetTargetRotation(float tiltValue) {
         m_targetLocalRotation = new Vector3(startingRotation.x, startingRotation.y, tiltValue * targetRotation.z);
         m_remainingRotation = m_targetLocalRotation - transform.localEulerAngles;
 
@@ -125,16 +121,14 @@ public class HeadTilt : MonoBehaviour
         m_traveledDistance = Vector3.zero;
     }
 
-    private void OnHeadTiltCanceled(CallbackContext ctx)
-    {
+    private void OnHeadTiltCanceled(CallbackContext ctx) {
         ResetTargetPoistion();
         ResetTargetRotation();
 
         tiltStatic = true;
     }
 
-    private void ResetTargetRotation()
-    {
+    private void ResetTargetRotation() {
         m_targetLocalRotation = startingRotation;
         m_remainingRotation = m_targetLocalRotation - transform.localEulerAngles;
 
@@ -153,8 +147,7 @@ public class HeadTilt : MonoBehaviour
         m_traveledRotation = Vector3.zero;
     }
 
-    private void ResetTargetPoistion()
-    {
+    private void ResetTargetPoistion() {
         m_targetLocalPosition = startingPosition;
         m_remainingDistance = m_targetLocalPosition - transform.localPosition;
 

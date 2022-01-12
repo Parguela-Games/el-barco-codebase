@@ -4,10 +4,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using static UnityEngine.InputSystem.InputAction;
 
-[RequireComponent(typeof (CharacterController))]
-[RequireComponent(typeof (PlayerInput))]
-public class FPControllerCharacter : MonoBehaviour
-{
+[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(PlayerInput))]
+public class FPControllerCharacter : MonoBehaviour {
     [Header("Movement")]
     [SerializeField] float movementSpeed = 5f;
     [SerializeField] float walkDivider = 2f;
@@ -38,14 +37,14 @@ public class FPControllerCharacter : MonoBehaviour
 
     private void Awake() {
         gameActions = new GameActions();
-        
+
         SetupCallbacks();
     }
 
     private void OnEnable() {
         gameActions.Player.Enable();
     }
-    
+
     private void OnDisable() {
         gameActions.Player.Disable();
     }
@@ -55,8 +54,7 @@ public class FPControllerCharacter : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
+    void Start() {
         m_characterController = GetComponent<CharacterController>();
         m_sprintController = GetComponent<SprintController>();
         m_crouchController = GetComponent<CrouchController>();
@@ -67,8 +65,7 @@ public class FPControllerCharacter : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update() {
         ProcessInput();
         ProcessMovement();
     }
@@ -89,9 +86,11 @@ public class FPControllerCharacter : MonoBehaviour
 
         if (m_crouchController) {
             m_moveVector /= m_crouchController.GetCrouchDivider();
-        } if(m_walking) {
+        }
+
+        if (m_walking) {
             m_moveVector /= walkDivider;
-        } else if(m_sprintController) {
+        } else if (m_sprintController) {
             m_moveVector *= m_sprintController.GetSprintMultiplier();
         }
 
@@ -115,23 +114,22 @@ public class FPControllerCharacter : MonoBehaviour
         );
     }
 
-    private void Jump(CallbackContext ctx)
-     {
-         if (groundCheck) {
-             m_playerVelocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
-         }
-     }
+    private void Jump(CallbackContext ctx) {
+        if (groundCheck) {
+            m_playerVelocity.y = Mathf.Sqrt(jumpForce * -2f * Physics.gravity.y);
+        }
+    }
 
     private void SetupCallbacks() {
-        gameActions.Player.Jump.performed += Jump;
-        
+        // gameActions.Player.Jump.performed += Jump;
+
         gameActions.Player.Walk.performed += (ctx) => m_walking = true;
         gameActions.Player.Walk.canceled += (ctx) => m_walking = false;
     }
 
     private void TeardownCallbacks() {
-        gameActions.Player.Jump.performed -= Jump;
-        
+        // gameActions.Player.Jump.performed -= Jump;
+
         gameActions.Player.Walk.performed -= (ctx) => m_walking = true;
         gameActions.Player.Walk.canceled -= (ctx) => m_walking = false;
     }

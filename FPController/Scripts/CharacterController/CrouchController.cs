@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
 
-public class CrouchController : MonoBehaviour
-{
+public class CrouchController : MonoBehaviour {
     [Header("Dependencies")]
     [SerializeField] CharacterController characterCollider;
 
@@ -13,12 +12,13 @@ public class CrouchController : MonoBehaviour
     [SerializeField] float crouchDivider = 3f;
     private float currCrouchDivider = 1f;
     private float startingHeight;
-    private float decrouchTime = 0.7f;
+    private float decrouchTime = 0.1f;
 
     [Header("Roof detection")]
     [SerializeField] LayerMask roofMask;
     private bool m_roofCheck = true;
     private float m_roofOffset = 0.1f;
+    private bool m_isDecrouching = false;
 
     GameActions gameActions;
 
@@ -42,8 +42,8 @@ public class CrouchController : MonoBehaviour
     }
 
     private void OnDestroy() {
-        gameActions.Player.Crouch.performed += OnCrouchPerformed;
-        gameActions.Player.Crouch.canceled += OnCrouchCanceled;
+        gameActions.Player.Crouch.performed -= OnCrouchPerformed;
+        gameActions.Player.Crouch.canceled -= OnCrouchCanceled;
     }
 
     private void Update() {
@@ -51,16 +51,16 @@ public class CrouchController : MonoBehaviour
     }
 
     private void OnCrouchPerformed(CallbackContext ctx) {
-        StopAllCoroutines();
-
-        currCrouchDivider = crouchDivider;
-        characterCollider.height -= crouchHeight;
-        characterCollider.center = new Vector3(characterCollider.center.x, characterCollider.center.y + crouchHeight / 2, characterCollider.center.z);
+        if (!m_isDecrouching) {
+            currCrouchDivider = crouchDivider;
+            characterCollider.height -= crouchHeight;
+            characterCollider.center = new Vector3(characterCollider.center.x, characterCollider.center.y + crouchHeight / 2, characterCollider.center.z);
+        }
     }
 
     private void OnCrouchCanceled(CallbackContext ctx) {
-        if(m_roofCheck) {
-            StartCoroutine(CheckDeCrouching());
+        if (m_roofCheck) {
+            StartCoroutine(CanDecrouch(ctx));
         } else {
             currCrouchDivider = 1f;
 
@@ -68,32 +68,35 @@ public class CrouchController : MonoBehaviour
         }
     }
 
-    private IEnumerator CheckDeCrouching() {
+    private IEnumerator CanDecrouch(CallbackContext ctx) {
         while (m_roofCheck) {
             yield return new WaitForSeconds(0.2f);
         }
 
-        OnCrouchCanceled(new CallbackContext());
+        OnCrouchCanceled(ctx);
     }
 
     private IEnumerator Decrouch() {
-        int steps = 60;
-        float fulltStep = crouchHeight / 2;
-        float targetPosition = transform.position.y + fulltStep;
-        float targetCenter = characterCollider.center.y - fulltStep;
+        m_isDecrouching = true;
+        int steps = 2;
+        float fullStep = crouchHeight / 2;
+        float targetPosition = transform.position.y + fullStep;
+        float targetCenter = characterCollider.center.y - fullStep;
         float targetHeight = characterCollider.height + crouchHeight;
 
-        while(characterCollider.height < startingHeight) {
-            transform.position = new Vector3(transform.position.x, transform.position.y + fulltStep / steps, transform.position.z);
-            characterCollider.center = new Vector3(characterCollider.center.x, characterCollider.center.y - fulltStep / steps, characterCollider.center.z);
+        while (characterCollider.height < startingHeight) {
+            transform.position = new Vector3(transform.position.x, transform.position.y + fullStep / steps, transform.position.z);
+            characterCollider.center = new Vector3(characterCollider.center.x, characterCollider.center.y - fullStep / steps, characterCollider.center.z);
             characterCollider.height += crouchHeight / steps;
 
             yield return new WaitForSeconds(decrouchTime / steps);
         }
 
-        transform.position = new Vector3(transform.position.x, targetPosition, transform.position.z);
-        characterCollider.center = new Vector3(characterCollider.center.x, targetCenter, characterCollider.center.z);
-        characterCollider.height = targetHeight;
+        // transform.position = new Vector3(transform.position.x, targetPosition, transform.position.z);
+        // characterCollider.center = new Vector3(characterCollider.center.x, targetCenter, characterCollider.center.z);
+        // characterCollider.height = targetHeight;
+
+        m_isDecrouching = false;
 
         yield return null;
     }

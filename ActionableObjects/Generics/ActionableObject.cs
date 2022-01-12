@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class ActionableObject : MonoBehaviour, IActionableObject
+namespace Manicomio.ActionableObjects
 {
+  public abstract class ActionableObject : MonoBehaviour, IActionableObject
+  {
 
     [Header("UI")]
     [Tooltip("The text that will appear in the overlay before interacting with this object")]
@@ -20,26 +22,29 @@ public abstract class ActionableObject : MonoBehaviour, IActionableObject
 
     protected bool m_interactive = true;
 
-    private void Start() {
-        InnerStart();
+    private void Start()
+    {
+      InnerStart();
     }
 
     protected abstract void InnerStart();
 
     public string GetInteractionText()
     {
-        return !m_interacted ? interactionText : interactionTextReverse;
+      return !m_interacted ? interactionText : interactionTextReverse;
     }
 
-    public void Interact() {
-        InnerInteract();
-        m_interacted = !m_interacted;
+    public void Interact()
+    {
+      InnerInteract();
+      m_interacted = !m_interacted;
     }
 
-    protected virtual void InnerInteract() {}
+    protected virtual void InnerInteract() { }
 
-    public virtual bool IsInteractiveByEnemies() {
-        return interactiveByEnemies;
+    public virtual bool IsInteractiveByEnemies()
+    {
+      return interactiveByEnemies;
     }
 
     public abstract bool IsAnimationPlaying();
@@ -47,4 +52,5 @@ public abstract class ActionableObject : MonoBehaviour, IActionableObject
     public virtual bool IsInteracterActive() => m_interactive;
 
     public virtual void SetIsInteractive(bool isInteractive) => m_interactive = isInteractive;
+  }
 }

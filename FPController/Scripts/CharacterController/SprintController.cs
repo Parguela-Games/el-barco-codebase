@@ -7,8 +7,7 @@ using static UnityEngine.InputSystem.InputAction;
 public delegate void NotifyStaminaEmpty();
 public delegate void NotifyStaminaRecovered();
 
-public class SprintController : MonoBehaviour
-{
+public class SprintController : MonoBehaviour {
     public static event NotifyStaminaEmpty OnStaminaEmpty;
     public static event NotifyStaminaEmpty OnStaminaRecovered;
 
@@ -129,6 +128,6 @@ public class SprintController : MonoBehaviour
     }
 
     private void UpdateStaminaIndicator() {
-        if(staminaIndicator) staminaIndicator.value = currStamina / maxStamina;
+        if (staminaIndicator) staminaIndicator.value = currStamina / maxStamina;
     }
 }

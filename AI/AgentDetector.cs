@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using Manicomio.ActionableObjects;
 using UnityEngine;
 
 public class AgentDetector : MonoBehaviour
