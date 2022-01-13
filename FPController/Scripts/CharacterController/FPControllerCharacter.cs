@@ -100,7 +100,7 @@ public class FPControllerCharacter : MonoBehaviour {
         *   - Sprinting
         */
         // Reduce the speed if the player is crouching
-        if (m_crouchController) {
+        if (m_crouchController?.GetCrouchDivider() != 1) {
             m_moveVector /= m_crouchController.GetCrouchDivider();
         } else if (m_walking) {
             // Reduce the speed if the player is walking
