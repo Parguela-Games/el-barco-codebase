@@ -21,17 +21,20 @@ namespace Manicomio.ActionableObjects {
         }
 
         private void UpdateAnimation() {
+            IsAnimationPlaying();
             if (m_interacted) {
-                m_animator.ResetTrigger("interact");
+                m_animator.SetTrigger("close");
             } else {
-                m_animator.SetTrigger("interact");
+                m_animator.SetTrigger("open");
             }
         }
 
         public override bool IsAnimationPlaying() {
             var state = m_animator.GetCurrentAnimatorStateInfo(0);
 
-            Debug.Log(state.fullPathHash);
+            AnimatorClipInfo[] clips = m_animator.GetCurrentAnimatorClipInfo(0);
+
+            if (clips.Length > 0) Debug.Log(clips[0].clip.name);
 
             return state.IsName(AnimationConstants.ANIMATION_GENERIC_END);
         }
