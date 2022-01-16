@@ -10,11 +10,17 @@ public class FPControllerCharacter : MonoBehaviour {
     [Header("Movement")]
     [Tooltip("Max movement speed")]
     [SerializeField] float movementSpeed = 5f;
+    [Tooltip("How fast the character will reach the max speed")]
+    [SerializeField] float acceleration = 5f;
+    [Tooltip("How fast the character will reach the 0 speed")]
+    [SerializeField] float deceleration = 10f;
+
 
     [Tooltip("Factor that will divide the max speed when walking")]
     [SerializeField] float walkDivider = 2f;
     private Vector3 m_playerVelocity;
     private Vector3 m_moveVector;
+    private Vector3 m_lastMoveVector;
 
 
     [Header("Ground detection")]
@@ -33,6 +39,7 @@ public class FPControllerCharacter : MonoBehaviour {
     private SprintController m_sprintController;
     private CrouchController m_crouchController;
     private Vector3 m_gravity = Vector3.zero;
+    private float m_currSpeed = 0f;
 
     // States
     private bool m_walking = false;
@@ -110,14 +117,24 @@ public class FPControllerCharacter : MonoBehaviour {
             m_moveVector *= m_sprintController.GetSprintMultiplier();
         }
 
+        if (m_moveVector.magnitude > Mathf.Epsilon && m_currSpeed < movementSpeed) {
+            m_currSpeed = Mathf.Clamp(m_currSpeed + acceleration * Time.deltaTime, 0f, movementSpeed);
+        } else if (m_moveVector.magnitude <= Mathf.Epsilon && m_currSpeed > Mathf.Epsilon) {
+            m_currSpeed = Mathf.Clamp(m_currSpeed - deceleration * Time.deltaTime, 0f, movementSpeed);
+            m_moveVector = m_lastMoveVector;
+        } else if (m_moveVector.magnitude <= Mathf.Epsilon && m_currSpeed <= Mathf.Epsilon) {
+            m_currSpeed = 0f;
+        }
+
         // Apply max speed to the move vector and scale based on delta time to adjust speed to framerate
-        m_characterController.Move(movementSpeed * m_moveVector * Time.deltaTime);
+        m_characterController.Move(m_currSpeed * m_moveVector * Time.deltaTime);
 
         // Apply gravity to player velocity
         m_playerVelocity += Physics.gravity * Time.deltaTime;
 
         // Apply velocity to movement (should be only vertical)
         m_characterController.Move(m_playerVelocity * Time.deltaTime);
+        m_lastMoveVector = m_moveVector;
     }
 
     /// <summary>Casts a sphere from player position (center), with same radius as the player colider, 
