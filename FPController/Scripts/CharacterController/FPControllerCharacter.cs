@@ -176,4 +176,6 @@ public class FPControllerCharacter : MonoBehaviour {
         gameActions.Player.Walk.performed -= (ctx) => m_walking = true;
         gameActions.Player.Walk.canceled -= (ctx) => m_walking = false;
     }
+
+    public float GetCurrentSpeed() => this.m_currSpeed;
 }
