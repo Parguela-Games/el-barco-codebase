@@ -1,13 +1,15 @@
 using Manicomio.ActionableObjects;
+using UnityEngine;
 
-public class KeyItem : ActionableObject
-{
-    protected override void InnerStart(){}
+namespace Manicomio.ActionableObjects {
+    public class KeyItem : ActionableObject {
+        protected override void InnerStart() { }
 
-    protected override void InnerInteract() {
-        ItemPickEvents.NotifyItemPick(this);
-        Destroy(gameObject);
+        protected override void InnerInteract(GameObject interactor = null) {
+            ItemPickEvents.NotifyItemPick(this);
+            Destroy(gameObject);
+        }
+
+        public override bool IsAnimationPlaying() => false;
     }
-
-    public override bool IsAnimationPlaying() => false;
 }

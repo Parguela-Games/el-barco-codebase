@@ -16,7 +16,7 @@ namespace Manicomio.ActionableObjects {
             m_animator = GetComponent<Animator>();
         }
 
-        protected override void InnerInteract() {
+        protected override void InnerInteract(GameObject interactor = null) {
             UpdateAnimation();
         }
 

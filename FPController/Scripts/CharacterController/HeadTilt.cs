@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 using static UnityEngine.InputSystem.InputAction;
 
-[RequireComponent(typeof(Camera))]
+[RequireComponent(typeof(CinemachineVirtualCamera))]
 public class HeadTilt : MonoBehaviour {
     [SerializeField]
     [Tooltip("The camera will slide horizontally when tilting, this is the max range")]

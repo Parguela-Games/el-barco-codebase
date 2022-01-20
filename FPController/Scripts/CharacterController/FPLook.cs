@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class FPLook : MonoBehaviour {
+    [SerializeField]
+    private CinemachineVirtualCamera virtualCamera;
+
+
     [SerializeField]
     [Tooltip("Vertical and horizontal sensitivity")]
     private LookSensitivity lookSensitivity = new LookSensitivity(1f, 0.2f);
@@ -96,10 +101,10 @@ public class FPLook : MonoBehaviour {
         }
 
         // Store the cure rotation to preserve the Z position
-        Vector3 currRotation = Camera.main.transform.eulerAngles;
+        Vector3 currRotation = virtualCamera.transform.eulerAngles;
 
         // The camera, instead, rotates along the X and Y axes so the player can look above and sideways
-        Camera.main.transform.eulerAngles = new Vector3(m_cameraPitch, m_cameraYaw, currRotation.z);
+        virtualCamera.transform.eulerAngles = new Vector3(m_cameraPitch, m_cameraYaw, currRotation.z);
     }
 
     private void ShowCursor(InputAction.CallbackContext obj) {
