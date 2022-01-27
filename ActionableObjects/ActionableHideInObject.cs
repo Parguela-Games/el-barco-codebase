@@ -24,8 +24,6 @@ namespace Manicomio.ActionableObjects {
 
         private GameActions m_gameActions;
 
-        private GameObject lastInteractor;
-
         private void Awake() {
             m_gameActions = new GameActions();
             m_gameActions.Player.Disable();
@@ -43,7 +41,7 @@ namespace Manicomio.ActionableObjects {
         }
 
         private void OnInteractPerformed(InputAction.CallbackContext obj) {
-            base.Interact(lastInteractor);
+            base.Interact();
         }
 
         protected override void InnerInteract(GameObject interactor = null) {
@@ -51,11 +49,7 @@ namespace Manicomio.ActionableObjects {
 
             if (!m_interacted) {
                 // Put the player inside the wardrobe
-                lastInteractor = interactor;
-                interactor.GetComponent<FPControllerCharacter>().enabled = false;
-                interactor.GetComponentInChildren<Renderer>().enabled = false;
-                interactor.GetComponent<ObjectInteractuator>().enabled = false;
-                interactor.GetComponent<FPLook>().enabled = false;
+                PlayerEvents.NotifyPlayerDeactivation();
 
                 hiddenCamera.enabled = true;
 
@@ -65,12 +59,8 @@ namespace Manicomio.ActionableObjects {
             } else {
                 hiddenCamera.enabled = false;
 
-                lastInteractor.GetComponent<FPControllerCharacter>().enabled = true;
-                lastInteractor.GetComponentInChildren<Renderer>().enabled = true;
-                lastInteractor.GetComponent<ObjectInteractuator>().enabled = true;
-                lastInteractor.GetComponent<FPLook>().enabled = true;
+                PlayerEvents.NotifyPlayerActivation();
 
-                lastInteractor = null;
                 m_gameActions.Player.Disable();
             }
         }

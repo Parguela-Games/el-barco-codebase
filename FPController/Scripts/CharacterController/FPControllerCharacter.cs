@@ -163,11 +163,25 @@ public class FPControllerCharacter : MonoBehaviour {
         }
     }
 
+    private void ActivatePlayer() {
+        enabled = true;
+        GetComponentInChildren<Renderer>().enabled = true;
+        gameActions.Player.Enable();
+    }
+
+    private void DeactivatePlayer() {
+        enabled = false;
+        GetComponentInChildren<Renderer>().enabled = false;
+        gameActions.Player.Disable();
+    }
+
     private void SetupCallbacks() {
         // gameActions.Player.Jump.performed += Jump;
 
         gameActions.Player.Walk.performed += (ctx) => m_walking = true;
         gameActions.Player.Walk.canceled += (ctx) => m_walking = false;
+        PlayerEvents.OnPlayerActivated += ActivatePlayer;
+        PlayerEvents.OnPlayerDeactivated += DeactivatePlayer;
     }
 
     private void TeardownCallbacks() {
@@ -175,6 +189,8 @@ public class FPControllerCharacter : MonoBehaviour {
 
         gameActions.Player.Walk.performed -= (ctx) => m_walking = true;
         gameActions.Player.Walk.canceled -= (ctx) => m_walking = false;
+        PlayerEvents.OnPlayerActivated -= ActivatePlayer;
+        PlayerEvents.OnPlayerDeactivated -= DeactivatePlayer;
     }
 
     public float GetCurrentSpeed() => this.m_currSpeed;

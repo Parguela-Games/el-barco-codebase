@@ -34,8 +34,6 @@ namespace Manicomio.ActionableObjects {
 
             AnimatorClipInfo[] clips = m_animator.GetCurrentAnimatorClipInfo(0);
 
-            if (clips.Length > 0) Debug.Log(clips[0].clip.name);
-
             return state.IsName(AnimationConstants.ANIMATION_GENERIC_END);
         }
     }

@@ -2,25 +2,34 @@ using Manicomio.ActionableObjects;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InventoryManager : MonoBehaviour
-{
+public class InventoryManager : MonoBehaviour {
     List<ActionableObject> items;
+    GameActions gameActions;
 
-    private void OnEnable() {
+    private void Awake() {
+        gameActions = new GameActions();
         ItemPickEvents.OnItemPick += OnItemPick;
+        gameActions.Player.Inventory.performed += (ctx) => PlayerEvents.NotifyInventoryOpen();
     }
 
-    void Start()
-    {
+    private void OnEnable() {
+        gameActions.Player.Enable();
+    }
+
+    void Start() {
         items = new List<ActionableObject>();
     }
 
     private void OnDisable() {
-        ItemPickEvents.OnItemPick -= OnItemPick;
+        gameActions.Player.Disable();
     }
 
-    private void OnItemPick(ActionableObject pickedItem)
-    {
+    private void OnDestroy() {
+        ItemPickEvents.OnItemPick -= OnItemPick;
+        gameActions.Player.Inventory.performed -= (ctx) => PlayerEvents.NotifyInventoryOpen();
+    }
+
+    private void OnItemPick(ActionableObject pickedItem) {
         this.items.Add(pickedItem);
     }
 }

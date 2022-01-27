@@ -59,8 +59,11 @@ public class FPLook : MonoBehaviour {
     private void Awake() {
         gameActions = new GameActions();
         gameActions.Player.ShowCursor.performed += ShowCursor;
+        PlayerEvents.OnPlayerActivated += () => enabled = true;
+        PlayerEvents.OnPlayerDeactivated += () => enabled = false;
+
         // Hide the cursor until the player wants to show it (only dev mode)
-        Cursor.visible = false;
+        // Cursor.visible = false;
     }
 
     private void OnEnable() {
@@ -69,6 +72,9 @@ public class FPLook : MonoBehaviour {
 
     private void OnDisable() {
         gameActions.Player.ShowCursor.performed -= ShowCursor;
+        PlayerEvents.OnPlayerActivated -= () => enabled = true;
+        PlayerEvents.OnPlayerDeactivated -= () => enabled = false;
+
         gameActions.Player.Disable();
     }
 

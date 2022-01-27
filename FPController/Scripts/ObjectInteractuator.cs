@@ -15,6 +15,8 @@ public class ObjectInteractuator : MonoBehaviour {
     private void Awake() {
         actions = new GameActions();
         actions.Player.Interact.performed += OnInteractPerformed;
+        PlayerEvents.OnPlayerActivated += () => enabled = true;
+        PlayerEvents.OnPlayerDeactivated += () => enabled = false;
     }
 
     private void OnEnable() {
@@ -27,6 +29,8 @@ public class ObjectInteractuator : MonoBehaviour {
 
     private void OnDestroy() {
         actions.Player.Interact.performed -= OnInteractPerformed;
+        PlayerEvents.OnPlayerActivated -= () => enabled = true;
+        PlayerEvents.OnPlayerDeactivated -= () => enabled = false;
     }
 
     private void Start() {
