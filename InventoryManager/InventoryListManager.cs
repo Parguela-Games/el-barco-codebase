@@ -113,6 +113,7 @@ public class InventoryListManager : MonoBehaviour {
         // right    (1, 0)
         // left     (-1 , 0)
         // Vertical takes prevalence over horizontal
+        Cursor.visible = false;
         Vector2 movement = ctx.ReadValue<Vector2>();
 
         Vector2 rowsAndCols = GetRowsAndCols();
@@ -169,6 +170,7 @@ public class InventoryListManager : MonoBehaviour {
     void SetUpCallbacks() {
         gameActions.UI.Navigate.performed += HandleNavigation;
         gameActions.UI.Exit.performed += (ctx) => PlayerEvents.NotifyInventoryClose();
+        gameActions.UI.Point.performed += (ctx) => Cursor.visible = true;
         PlayerEvents.OnInventoryOpened += ActivateInventory;
         PlayerEvents.OnInventoryClosed += DeactivateInventory;
         InventoryEvents.OnSlotHighlight += (slot) => SelectSlot(slot);
@@ -177,6 +179,7 @@ public class InventoryListManager : MonoBehaviour {
     void TeardownCallbacks() {
         gameActions.UI.Navigate.performed -= HandleNavigation;
         gameActions.UI.Exit.performed -= (ctx) => PlayerEvents.NotifyInventoryClose();
+        gameActions.UI.Point.performed -= (ctx) => Cursor.visible = true;
         PlayerEvents.OnInventoryOpened -= ActivateInventory;
         PlayerEvents.OnInventoryClosed -= DeactivateInventory;
         InventoryEvents.OnSlotHighlight += (slot) => SelectSlot(slot);
