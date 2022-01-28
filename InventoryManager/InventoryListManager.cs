@@ -43,18 +43,16 @@ public class InventoryListManager : MonoBehaviour {
     }
 
     void ActivateInventory() {
-        Debug.Log("Activate inventory");
         gameObject.SetActive(true);
         gameActions.UI.Enable();
-        InputSystem.DisableDevice(Mouse.current);
-        Cursor.visible = false;
+        Cursor.visible = true;
         EventSystem.current.SetSelectedGameObject(null);
     }
 
     void DeactivateInventory() {
         gameObject.SetActive(false);
         gameActions.UI.Disable();
-        InputSystem.EnableDevice(Mouse.current);
+        Cursor.visible = false;
     }
 
     private Vector2 GetRowsAndCols() {
@@ -64,6 +62,11 @@ public class InventoryListManager : MonoBehaviour {
         int cols = slots.Select(slot => slot.anchoredPosition.x).Distinct().Count();
 
         return new Vector2(rows, cols);
+    }
+
+    private void SelectSlot(GameObject slot) {
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(slot);
     }
 
     private Vector2 FirstAndLastVisibleRow() {
@@ -135,10 +138,7 @@ public class InventoryListManager : MonoBehaviour {
 
         nextButton = Mathf.Clamp(nextButton, 0, slots.Length);
 
-        Debug.Log(nextButton);
-
-        EventSystem.current.SetSelectedGameObject(null);
-        EventSystem.current.SetSelectedGameObject(slots[nextButton].gameObject);
+        SelectSlot(slots[nextButton].gameObject);
 
         int nextButtonRow = Mathf.FloorToInt(nextButton / rowsAndCols.y);
         Vector2 visibleRows = FirstAndLastVisibleRow();
@@ -171,6 +171,7 @@ public class InventoryListManager : MonoBehaviour {
         gameActions.UI.Exit.performed += (ctx) => PlayerEvents.NotifyInventoryClose();
         PlayerEvents.OnInventoryOpened += ActivateInventory;
         PlayerEvents.OnInventoryClosed += DeactivateInventory;
+        InventoryEvents.OnSlotHighlight += (slot) => SelectSlot(slot);
     }
 
     void TeardownCallbacks() {
@@ -178,5 +179,6 @@ public class InventoryListManager : MonoBehaviour {
         gameActions.UI.Exit.performed -= (ctx) => PlayerEvents.NotifyInventoryClose();
         PlayerEvents.OnInventoryOpened -= ActivateInventory;
         PlayerEvents.OnInventoryClosed -= DeactivateInventory;
+        InventoryEvents.OnSlotHighlight += (slot) => SelectSlot(slot);
     }
 }
