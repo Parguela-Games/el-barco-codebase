@@ -1,7 +1,10 @@
+using System.Collections.Generic;
+using Manicomio.ActionableObjects;
+
 public delegate void NotifyPlayerDeactivation();
 public delegate void NotifyPlayerActivation();
 
-public delegate void NotifyInventoryOpen();
+public delegate void NotifyInventoryOpen(List<PickableObject> items);
 public delegate void NotifyInventoryClose();
 
 public static class PlayerEvents {
@@ -19,9 +22,9 @@ public static class PlayerEvents {
         OnPlayerActivated?.Invoke();
     }
 
-    public static void NotifyInventoryOpen() {
+    public static void NotifyInventoryOpen(List<PickableObject> items) {
         OnPlayerDeactivated?.Invoke();
-        OnInventoryOpened?.Invoke();
+        OnInventoryOpened?.Invoke(items);
     }
 
     public static void NotifyInventoryClose() {

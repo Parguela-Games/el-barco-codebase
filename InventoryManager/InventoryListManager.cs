@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Manicomio.ActionableObjects;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -14,6 +15,9 @@ enum Direction {
 }
 
 public class InventoryListManager : MonoBehaviour {
+    [SerializeField]
+    GameObject slotPrefab;
+
     RectTransform[] slots;
     RectTransform contentRect;
     GridLayoutGroup contentLayoutGroup;
@@ -34,7 +38,7 @@ public class InventoryListManager : MonoBehaviour {
 
     // Start is called before the first frame update
     void Start() {
-        slots = GetComponentsInChildren<Button>().Select(button => button.GetComponent<RectTransform>()).ToArray();
+        // slots = GetComponentsInChildren<Button>().Select(button => button.GetComponent<RectTransform>()).ToArray();
 
         contentLayoutGroup = GetComponentInChildren<GridLayoutGroup>();
         contentRect = contentLayoutGroup.GetComponent<RectTransform>();
@@ -42,17 +46,55 @@ public class InventoryListManager : MonoBehaviour {
         inventoryScroll = GetComponentInChildren<ScrollRect>();
     }
 
-    void ActivateInventory() {
+    void ActivateInventory(List<PickableObject> items) {
+        if (contentLayoutGroup == null) {
+            Start();
+        }
+
         gameObject.SetActive(true);
         gameActions.UI.Enable();
         Cursor.visible = true;
         EventSystem.current.SetSelectedGameObject(null);
+
+        if (items != null) {
+            slots = new RectTransform[items.Count];
+
+            for (int slotIdx = 0; slotIdx < items.Count; slotIdx++) {
+                GameObject slot = Instantiate(slotPrefab, contentLayoutGroup.transform);
+                PickableObject slotObj = items[slotIdx];
+
+                Texture2D inventoryImage = slotObj.GetInventorySprite();
+
+                slot.GetComponent<Image>().sprite = Sprite.Create(inventoryImage, new Rect(0.0f, 0.0f, inventoryImage.width, inventoryImage.height), new Vector2(0.5f, 0.5f), 100.0f);
+                slot.GetComponent<InventorySlotController>().SetObjectInSlot(slotObj);
+                slots[slotIdx] = slot.GetComponent<RectTransform>();
+            }
+        }
     }
 
     void DeactivateInventory() {
+        if (slots != null) {
+            foreach (RectTransform slot in slots) {
+                Destroy(slot.gameObject);
+            }
+            slots = null;
+        }
+
         gameObject.SetActive(false);
         gameActions.UI.Disable();
         Cursor.visible = false;
+    }
+
+    // Leave it idle because detailed view will be on top
+    void SuspendInventory(Mesh _, Material __) {
+        gameActions.UI.Exit.Disable();
+        gameObject.SetActive(false);
+    }
+
+    // Awake again when exiting detailed view
+    void AwakeInventory() {
+        gameActions.UI.Exit.Enable();
+        gameObject.SetActive(true);
     }
 
     private Vector2 GetRowsAndCols() {
@@ -67,6 +109,10 @@ public class InventoryListManager : MonoBehaviour {
     private void SelectSlot(GameObject slot) {
         EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(slot);
+    }
+
+    private void DeselectSlot(GameObject slot) {
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     private Vector2 FirstAndLastVisibleRow() {
@@ -124,10 +170,10 @@ public class InventoryListManager : MonoBehaviour {
         );
 
         // Up
-        if (movement.y > 0 && nextButton >= rowsAndCols.y) {
+        if (movement.y > 0) {
             nextButton -= (int)rowsAndCols.y;
             // Down
-        } else if (movement.y < 0 && nextButton < slots.Length - rowsAndCols.y) {
+        } else if (movement.y < 0) {
             nextButton += (int)rowsAndCols.y;
             // Right
         } else if (movement.x > 0 && nextButton < slots.Length - 1) {
@@ -137,7 +183,11 @@ public class InventoryListManager : MonoBehaviour {
             nextButton -= 1;
         }
 
-        nextButton = Mathf.Clamp(nextButton, 0, slots.Length);
+        Debug.Log($"Next button {nextButton}");
+
+        nextButton = Mathf.Clamp(nextButton, 0, slots.Length - 1);
+
+        Debug.Log($"Next button clamped {nextButton}");
 
         SelectSlot(slots[nextButton].gameObject);
 
@@ -174,6 +224,9 @@ public class InventoryListManager : MonoBehaviour {
         PlayerEvents.OnInventoryOpened += ActivateInventory;
         PlayerEvents.OnInventoryClosed += DeactivateInventory;
         InventoryEvents.OnSlotHighlight += (slot) => SelectSlot(slot);
+        InventoryEvents.OnSlotDehighlight += (slot) => DeselectSlot(slot);
+        InventoryEvents.OnDetailedViewOpen += SuspendInventory;
+        InventoryEvents.OnDetailedViewClose += AwakeInventory;
     }
 
     void TeardownCallbacks() {
@@ -182,6 +235,9 @@ public class InventoryListManager : MonoBehaviour {
         gameActions.UI.Point.performed -= (ctx) => Cursor.visible = true;
         PlayerEvents.OnInventoryOpened -= ActivateInventory;
         PlayerEvents.OnInventoryClosed -= DeactivateInventory;
-        InventoryEvents.OnSlotHighlight += (slot) => SelectSlot(slot);
+        InventoryEvents.OnSlotHighlight -= (slot) => SelectSlot(slot);
+        InventoryEvents.OnSlotDehighlight -= (slot) => DeselectSlot(slot);
+        InventoryEvents.OnDetailedViewOpen -= SuspendInventory;
+        InventoryEvents.OnDetailedViewClose -= AwakeInventory;
     }
 }

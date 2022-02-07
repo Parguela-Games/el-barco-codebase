@@ -3,13 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour {
-    List<ActionableObject> items;
+    List<PickableObject> items;
     GameActions gameActions;
 
     private void Awake() {
         gameActions = new GameActions();
         ItemPickEvents.OnItemPick += OnItemPick;
-        gameActions.Player.Inventory.performed += (ctx) => PlayerEvents.NotifyInventoryOpen();
+        gameActions.Player.Inventory.performed += (ctx) => PlayerEvents.NotifyInventoryOpen(items);
+        PlayerEvents.OnPlayerDeactivated += () => gameActions.Player.Disable();
+        PlayerEvents.OnPlayerActivated += () => gameActions.Player.Enable();
+    }
+
+    private void OnDestroy() {
+        ItemPickEvents.OnItemPick -= OnItemPick;
+        gameActions.Player.Inventory.performed -= (ctx) => PlayerEvents.NotifyInventoryOpen(items);
+        PlayerEvents.OnPlayerDeactivated -= () => gameActions.Player.Disable();
+        PlayerEvents.OnPlayerActivated -= () => gameActions.Player.Enable();
+        items = null;
     }
 
     private void OnEnable() {
@@ -17,19 +27,14 @@ public class InventoryManager : MonoBehaviour {
     }
 
     void Start() {
-        items = new List<ActionableObject>();
+        items = new List<PickableObject>();
     }
 
     private void OnDisable() {
         gameActions.Player.Disable();
     }
 
-    private void OnDestroy() {
-        ItemPickEvents.OnItemPick -= OnItemPick;
-        gameActions.Player.Inventory.performed -= (ctx) => PlayerEvents.NotifyInventoryOpen();
-    }
-
-    private void OnItemPick(ActionableObject pickedItem) {
+    private void OnItemPick(PickableObject pickedItem) {
         this.items.Add(pickedItem);
     }
 }

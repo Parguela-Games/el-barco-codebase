@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class OverlayManager : MonoBehaviour {
     private void Awake() {
-        PlayerEvents.OnInventoryOpened += () => enabled = false;
-        PlayerEvents.OnInventoryClosed += () => enabled = true;
+        PlayerEvents.OnInventoryOpened += (items) => gameObject.SetActive(false);
+        PlayerEvents.OnInventoryClosed += () => gameObject.SetActive(true);
     }
 
     private void OnDestroy() {
-        PlayerEvents.OnInventoryOpened -= () => enabled = false;
-        PlayerEvents.OnInventoryClosed -= () => enabled = true;
+        PlayerEvents.OnInventoryOpened -= (items) => gameObject.SetActive(false);
+        PlayerEvents.OnInventoryClosed -= () => gameObject.SetActive(true);
     }
 }
