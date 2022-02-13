@@ -9,6 +9,9 @@ public class FPLook : MonoBehaviour {
     [SerializeField]
     private CinemachineVirtualCamera virtualCamera;
 
+    [SerializeField]
+    private Transform flashLight;
+
 
     [SerializeField]
     [Tooltip("Vertical and horizontal sensitivity")]
@@ -63,7 +66,7 @@ public class FPLook : MonoBehaviour {
         PlayerEvents.OnPlayerDeactivated += () => enabled = false;
 
         // Hide the cursor until the player wants to show it (only dev mode)
-        // Cursor.visible = false;
+        Cursor.visible = false;
     }
 
     private void OnEnable() {
@@ -111,6 +114,7 @@ public class FPLook : MonoBehaviour {
 
         // The camera, instead, rotates along the X and Y axes so the player can look above and sideways
         virtualCamera.transform.eulerAngles = new Vector3(m_cameraPitch, m_cameraYaw, currRotation.z);
+        flashLight.eulerAngles = new Vector3(m_cameraPitch, m_cameraYaw, currRotation.z);
     }
 
     private void ShowCursor(InputAction.CallbackContext obj) {
